@@ -34,7 +34,12 @@ jobs:
           site = Path('_site')
           site.mkdir(exist_ok=True)
 
-          kemenhub_data = base64.b64decode(Path('assets/logo-kemenhub.b64').read_text().strip())
+          def decode_b64_file(path):
+              value = ''.join(Path(path).read_text().split())
+              value += '=' * (-len(value) % 4)
+              return base64.b64decode(value)
+
+          kemenhub_data = decode_b64_file('assets/logo-kemenhub.b64')
           if not kemenhub_data.startswith(b'\x89PNG\r\n\x1a\n'):
               raise SystemExit('Logo Kemenhub bukan file PNG yang valid.')
           width, height = struct.unpack('>II', kemenhub_data[16:24])
@@ -43,7 +48,7 @@ jobs:
           (site / 'logo-kemenhub-final.png').write_bytes(kemenhub_data)
 
           (site / 'logo-otban-x.jpg').write_bytes(
-              base64.b64decode(Path('assets/logo-otban-x.b64').read_text().strip())
+              decode_b64_file('assets/logo-otban-x.b64')
           )
 
           website_files = (
